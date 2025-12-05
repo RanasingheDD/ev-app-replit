@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'dart:html' as html;
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/api_config.dart';
 
 class ApiException implements Exception {
@@ -23,31 +23,27 @@ class ApiService {
   String? _refreshToken;
 
   Future<void> init() async {
-    try {
-      _accessToken = html.window.localStorage['access_token'];
-      _refreshToken = html.window.localStorage['refresh_token'];
-    } catch (_) {
-      _accessToken = null;
-      _refreshToken = null;
-    }
+    final prefs = await SharedPreferences.getInstance();
+    _accessToken = prefs.getString('access_token');
+    _refreshToken = prefs.getString('refresh_token');
   }
 
   Future<void> setTokens(String accessToken, String refreshToken) async {
     _accessToken = accessToken;
     _refreshToken = refreshToken;
-    try {
-      html.window.localStorage['access_token'] = accessToken;
-      html.window.localStorage['refresh_token'] = refreshToken;
-    } catch (_) {}
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('access_token', accessToken);
+    await prefs.setString('refresh_token', refreshToken);
   }
 
   Future<void> clearTokens() async {
     _accessToken = null;
     _refreshToken = null;
-    try {
-      html.window.localStorage.remove('access_token');
-      html.window.localStorage.remove('refresh_token');
-    } catch (_) {}
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('access_token');
+    await prefs.remove('refresh_token');
   }
 
   bool get isAuthenticated => _accessToken != null;
@@ -61,69 +57,86 @@ class ApiService {
     return headers;
   }
 
-  Future<Map<String, dynamic>> get(String endpoint, {Map<String, String>? queryParams}) async {
+  Future<Map<String, dynamic>> get(
+    String endpoint, {
+    Map<String, String>? queryParams,
+  }) async {
     try {
       var uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
-      if (queryParams != null && queryParams.isNotEmpty) {
-        uri = uri.replace(queryParameters: queryParams);
-      }
+      if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
 
-      final response = await http.get(uri, headers: _headers).timeout(ApiConfig.connectionTimeout);
-
-      return _handleResponse(response);
-    } catch (e) {
-      if (e is ApiException) rethrow;
-      throw ApiException('Network error: ${e.toString()}');
-    }
-  }
-
-  Future<Map<String, dynamic>> post(String endpoint, {Map<String, dynamic>? body}) async {
-    try {
-      final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
       final response = await http
-          .post(uri, headers: _headers, body: body != null ? jsonEncode(body) : null)
+          .get(uri, headers: _headers)
           .timeout(ApiConfig.connectionTimeout);
 
       return _handleResponse(response);
     } catch (e) {
       if (e is ApiException) rethrow;
-      throw ApiException('Network error: ${e.toString()}');
+      throw ApiException('Network error: $e');
     }
   }
 
-  Future<Map<String, dynamic>> put(String endpoint, {Map<String, dynamic>? body}) async {
+  Future<Map<String, dynamic>> post(
+    String endpoint, {
+    Map<String, dynamic>? body,
+  }) async {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
       final response = await http
-          .put(uri, headers: _headers, body: body != null ? jsonEncode(body) : null)
+          .post(
+            uri,
+            headers: _headers,
+            body: body != null ? jsonEncode(body) : null,
+          )
           .timeout(ApiConfig.connectionTimeout);
 
       return _handleResponse(response);
     } catch (e) {
       if (e is ApiException) rethrow;
-      throw ApiException('Network error: ${e.toString()}');
+      throw ApiException('Network error: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> put(
+    String endpoint, {
+    Map<String, dynamic>? body,
+  }) async {
+    try {
+      final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+      final response = await http
+          .put(
+            uri,
+            headers: _headers,
+            body: body != null ? jsonEncode(body) : null,
+          )
+          .timeout(ApiConfig.connectionTimeout);
+
+      return _handleResponse(response);
+    } catch (e) {
+      if (e is ApiException) rethrow;
+      throw ApiException('Network error: $e');
     }
   }
 
   Future<Map<String, dynamic>> delete(String endpoint) async {
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}$endpoint');
-      final response = await http.delete(uri, headers: _headers).timeout(ApiConfig.connectionTimeout);
+      final response = await http.delete(uri, headers: _headers);
 
       return _handleResponse(response);
     } catch (e) {
       if (e is ApiException) rethrow;
-      throw ApiException('Network error: ${e.toString()}');
+      throw ApiException('Network error: $e');
     }
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
     final statusCode = response.statusCode;
-    Map<String, dynamic>? data;
 
+    Map<String, dynamic>? data;
     try {
       if (response.body.isNotEmpty) {
-        data = jsonDecode(response.body) as Map<String, dynamic>;
+        data = jsonDecode(response.body);
       }
     } catch (_) {
       data = null;
@@ -133,19 +146,7 @@ class ApiService {
       return data ?? {'success': true};
     }
 
-    final message = data?['message'] ?? data?['error'] ?? 'An error occurred';
-
-    if (statusCode == 401) {
-      throw ApiException('Unauthorized. Please login again.', statusCode: statusCode, data: data);
-    } else if (statusCode == 403) {
-      throw ApiException('Access denied.', statusCode: statusCode, data: data);
-    } else if (statusCode == 404) {
-      throw ApiException('Resource not found.', statusCode: statusCode, data: data);
-    } else if (statusCode == 422) {
-      throw ApiException(message, statusCode: statusCode, data: data);
-    } else if (statusCode >= 500) {
-      throw ApiException('Server error. Please try again later.', statusCode: statusCode, data: data);
-    }
+    final message = data?['message'] ?? data?['error'] ?? 'Error occurred';
 
     throw ApiException(message, statusCode: statusCode, data: data);
   }
@@ -155,6 +156,7 @@ class ApiService {
 
     try {
       final uri = Uri.parse('${ApiConfig.baseUrl}/auth/refresh');
+
       final response = await http.post(
         uri,
         headers: ApiConfig.defaultHeaders,
@@ -162,8 +164,8 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body) as Map<String, dynamic>;
-        await setTokens(data['accessToken'], data['refreshToken'] ?? _refreshToken!);
+        final data = jsonDecode(response.body);
+        await setTokens(data['accessToken'], data['refreshToken']);
         return true;
       }
     } catch (_) {}

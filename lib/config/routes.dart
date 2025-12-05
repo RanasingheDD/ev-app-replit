@@ -1,3 +1,4 @@
+import 'package:evhub_app/screens/payment/topup_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/auth/splash_screen.dart';
@@ -38,6 +39,7 @@ class AppRoutes {
   static const String evManagement = '/ev-management';
   static const String addEv = '/add-ev';
   static const String editEv = '/edit-ev/:evId';
+  static const String topup = '/topup/:name/:id';
   static const String settings = '/settings';
 
   static final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -159,6 +161,15 @@ class AppRoutes {
         builder: (context, state) {
           final evId = state.pathParameters['evId']!;
           return AddEvScreen(evId: evId);
+        },
+      ),
+      GoRoute(
+        path: topup,
+        name: 'topup',
+        builder: (context, state) {
+          final name = state.pathParameters['name']!;
+          final id = state.pathParameters['id']!;
+          return TopupScreen(name: name, id: id);
         },
       ),
       GoRoute(

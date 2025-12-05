@@ -1,3 +1,4 @@
+import 'package:evhub_app/providers/points_provide.dart';
 import 'package:evhub_app/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => ChargingProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => PointsProvider()),
       ],
       child: const EVHubApp(),
     ),

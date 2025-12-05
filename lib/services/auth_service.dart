@@ -5,10 +5,10 @@ class AuthService {
   final ApiService _api = ApiService();
 
   Future<AuthResult> login(String email, String password) async {
-    final response = await _api.post('/auth/login', body: {
-      'email': email,
-      'password': password,
-    });
+    final response = await _api.post(
+      '/auth/login',
+      body: {'email': email, 'password': password},
+    );
 
     final tokens = AuthTokens.fromJson(response);
     await _api.setTokens(tokens.accessToken, tokens.refreshToken);
@@ -23,12 +23,15 @@ class AuthService {
     required String phone,
     required String password,
   }) async {
-    final response = await _api.post('/auth/register', body: {
-      'name': name,
-      'email': email,
-      'phone': phone,
-      'password': password,
-    });
+    final response = await _api.post(
+      '/auth/register',
+      body: {
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'password': password,
+      },
+    );
 
     final tokens = AuthTokens.fromJson(response);
     await _api.setTokens(tokens.accessToken, tokens.refreshToken);
@@ -54,10 +57,10 @@ class AuthService {
   }
 
   Future<void> resetPassword(String token, String newPassword) async {
-    await _api.post('/auth/reset-password', body: {
-      'token': token,
-      'password': newPassword,
-    });
+    await _api.post(
+      '/auth/reset-password',
+      body: {'token': token, 'password': newPassword},
+    );
   }
 
   Future<User> updateProfile({String? name, String? phone}) async {
@@ -69,11 +72,14 @@ class AuthService {
     return User.fromJson(response);
   }
 
-  Future<void> changePassword(String currentPassword, String newPassword) async {
-    await _api.post('/auth/change-password', body: {
-      'currentPassword': currentPassword,
-      'newPassword': newPassword,
-    });
+  Future<void> changePassword(
+    String currentPassword,
+    String newPassword,
+  ) async {
+    await _api.post(
+      '/auth/change-password',
+      body: {'currentPassword': currentPassword, 'newPassword': newPassword},
+    );
   }
 
   bool get isAuthenticated => _api.isAuthenticated;

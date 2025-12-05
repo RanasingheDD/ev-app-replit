@@ -1,3 +1,5 @@
+import 'package:evhub_app/config/routes.dart';
+import 'package:evhub_app/providers/points_provide.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -116,12 +118,12 @@ class _BookingScreenState extends State<BookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<StationProvider, BookingProvider>(
-      builder: (context, stationProvider, bookingProvider, _) {
+    return Consumer3<StationProvider, BookingProvider,PointsProvider>(
+      builder: (context, stationProvider, bookingProvider,pointsProvider, _) {
         final station = stationProvider.selectedStation;
         final charger = station?.chargers.firstWhere(
           (c) => c.id == widget.chargerId,
-          orElse: () => station!.chargers.first,
+          orElse: () => station.chargers.first,
         );
 
         return LoadingOverlay(
@@ -144,33 +146,65 @@ class _BookingScreenState extends State<BookingScreen> {
                         const SizedBox(height: 24),
                         _buildDurationSelection(),
                         const SizedBox(height: 24),
+                        _buildAvailablePoints(100),
+                        const SizedBox(height: 24),
                         _buildSummary(station),
                         const SizedBox(height: 100),
                       ],
                     ),
                   ),
-            bottomNavigationBar: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: SafeArea(
-                child: ElevatedButton(
-                  onPressed: _confirmBooking,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(56),
-                  ),
-                  child: const Text('Confirm Booking'),
+ bottomNavigationBar: Builder(
+  builder: (context) {
+    final station = stationProvider.selectedStation;
+    final tariff = station?.tariffRules.isNotEmpty == true
+        ? station?.tariffRules.first
+        : null;
+
+    final estimatedCost = tariff != null
+        ? tariff.calculateCost(
+            durationMinutes: _durationMinutes,
+            energyKwh: 20.0,
+          )
+        : 0.0;
+
+          final bool hasEnoughPoints = pointsProvider.points >= estimatedCost;
+
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppTheme.surfaceColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SafeArea(
+              child: ElevatedButton(
+                onPressed: () {
+                  if (hasEnoughPoints) {
+                    _confirmBooking();      // Existing function
+                  } else {
+                    final user = context.read<AuthProvider>().user;
+                    context.go(
+                        '/topup/${user?.name}/${user?.id}',
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                ),
+                child: Text(
+                  hasEnoughPoints ? 'Confirm Booking' : 'Recharge Points',
                 ),
               ),
             ),
+          );
+        },
+      ),
+
           ),
         );
       },
@@ -420,6 +454,27 @@ class _BookingScreenState extends State<BookingScreen> {
               onSelected: (_) => setState(() => _durationMinutes = minutes),
             );
           }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAvailablePoints(int points) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Points',
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(color: AppTheme.offlineColor),
+        ),
+        Card(
+          color: AppTheme.surfaceColor,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: _SummaryRow(label: 'Available Points', value: points.toString()),
+          ),
         ),
       ],
     );

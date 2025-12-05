@@ -4,6 +4,7 @@ class User {
   final String email;
   final String? phone;
   final String role;
+  final int points;
   final DateTime createdAt;
 
   User({
@@ -12,6 +13,7 @@ class User {
     required this.email,
     this.phone,
     required this.role,
+    required this.points,
     required this.createdAt,
   });
 
@@ -22,6 +24,7 @@ class User {
       email: json['email'] as String? ?? '',
       phone: json['phone'] as String? ?? '',
       role: json['role'] as String? ?? 'user',
+      points: json['points'] as int? ?? 0,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String).toLocal()
           : DateTime.now(),
@@ -35,6 +38,7 @@ class User {
       'email': email,
       'phone': phone,
       'role': role,
+      'points' : points,
       'createdAt': createdAt.toIso8601String(),
     };
   }
@@ -45,6 +49,7 @@ class User {
     String? email,
     String? phone,
     String? role,
+    int? points,
     DateTime? createdAt,
   }) {
     return User(
@@ -53,6 +58,7 @@ class User {
       email: email ?? this.email,
       phone: phone ?? this.phone,
       role: role ?? this.role,
+      points: points ?? this.points,
       createdAt: createdAt ?? this.createdAt,
     );
   }

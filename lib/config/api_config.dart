@@ -1,5 +1,5 @@
 class ApiConfig {
-  static const String baseUrl = 'https://bce984d9dc76.ngrok-free.app/api';
+  static const String baseUrl = 'https://bf7036ee52d5.ngrok-free.app/api';
   static const String wsUrl = 'wss://api.evhub.lk/ws';
 
   static const Duration connectionTimeout = Duration(seconds: 30);

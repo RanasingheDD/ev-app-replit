@@ -179,7 +179,7 @@ class _AddEvScreenState extends State<AddEvScreen> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
-                      value: _selectedMake,
+                      initialValue: _selectedMake,
                       decoration: const InputDecoration(
                         labelText: 'Make',
                         prefixIcon: Icon(Icons.business),
@@ -201,7 +201,7 @@ class _AddEvScreenState extends State<AddEvScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _selectedModel,
+                      initialValue: _selectedModel,
                       decoration: const InputDecoration(
                         labelText: 'Model',
                         prefixIcon: Icon(Icons.directions_car),
@@ -222,7 +222,7 @@ class _AddEvScreenState extends State<AddEvScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<int>(
-                      value: _selectedYear,
+                      initialValue: _selectedYear,
                       decoration: const InputDecoration(
                         labelText: 'Year (optional)',
                         prefixIcon: Icon(Icons.calendar_today),

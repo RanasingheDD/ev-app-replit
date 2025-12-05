@@ -21,9 +21,7 @@ class BookingService {
         'evId': evId,
       },
     );
-
-    print(startAt);
-    print(startAt.toUtc().toIso8601String());
+    
     return BookingQuote.fromJson(response);
   }
 

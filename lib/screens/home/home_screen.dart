@@ -1,3 +1,5 @@
+import 'package:evhub_app/screens/payment/topup_page.dart';
+import 'package:evhub_app/widgets/wallet_card.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -5,9 +7,6 @@ import '../../config/theme.dart';
 import '../../config/routes.dart';
 import '../../providers/providers.dart';
 import '../../widgets/station_card.dart';
-import '../../models/station.dart';
-import '../../models/charger.dart';
-import '../../models/tariff.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -636,6 +635,20 @@ class _ProfileTab extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                WalletCard(
+                  points: user!.points,
+                  onTap: () {
+                    // Navigate to payment options
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            TopupScreen(name: user!.name, id: user.id),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 Text(

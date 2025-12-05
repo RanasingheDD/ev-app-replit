@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import '../../config/theme.dart';
 import '../../providers/station_provider.dart';
 import '../../models/station.dart';
-import '../../models/charger.dart';
-import '../../models/tariff.dart';
 import '../../widgets/station_card.dart';
 
 class StationDetailScreen extends StatefulWidget {
