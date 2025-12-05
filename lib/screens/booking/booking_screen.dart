@@ -1,4 +1,3 @@
-import 'package:evhub_app/config/routes.dart';
 import 'package:evhub_app/providers/points_provide.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

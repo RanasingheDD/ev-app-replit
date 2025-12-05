@@ -645,18 +645,18 @@ class _ProfileTab extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) =>
-                            TopupScreen(name: user!.name, id: user.id),
+                            TopupScreen(name: user.name, id: user.id),
                       ),
                     );
                   },
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  user?.name ?? 'User',
+                  user.name ?? 'User',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 Text(
-                  user?.email ?? '',
+                  user.email ?? '',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
