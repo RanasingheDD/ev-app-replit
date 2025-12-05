@@ -1,5 +1,6 @@
 import 'package:evhub_app/config/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class TopupScreen extends StatefulWidget {
   final String name;
@@ -24,6 +25,8 @@ class _TopupScreenState extends State<TopupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Top Up Points"),
+        leading: IconButton(onPressed: context.pop,
+        icon: Icon(Icons.arrow_back, color: Colors.white)),
       ),
 
       body: SingleChildScrollView(
